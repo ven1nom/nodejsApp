@@ -9,7 +9,9 @@ const  helper=(req)=>{
     {
         throw new Error('Complete all details')
     }
+}
 
-
+const authenticator=(req)=>{
+    
 }
 module.exports={helper}

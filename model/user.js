@@ -1,5 +1,7 @@
 const mongoose=require('mongoose');
 const validator=require('validator');
+const jwt=require('jsonwebtoken')
+const bcrypt = require('bcrypt');
 
 const userSchema=mongoose.Schema({
     firstName:{
@@ -76,3 +78,24 @@ module.exports={User}
 //Data sanitization each input of data
 // for POST and PATCH
 // nvr trust on req.body 
+
+//DB level methods , when we want to run method one each new user
+//whenever a new user sign in we want to create jwt token and also comparre password for each user
+userSchema.methods.getJWT=async function()
+{
+    //we are concerrned about this user
+    const user=this;
+
+    const token=await jwt.sign({_id:user._id},'shhhhh', {
+        expiresIn:"7d",
+    });
+    return token;
+}
+// we can also offload the bcrypt compare here also
+userSchema.methods.validatePassword=async function(passwordInputByUser)
+{
+    const user=this;
+    const passwordHash=user.password
+    const isPasswordValid= await bcrypt.compare(passwordInputByUser,passwordHash)
+   return isPasswordValid;
+}

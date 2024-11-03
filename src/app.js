@@ -7,6 +7,7 @@ var jwt = require('jsonwebtoken');
 const {connectDB}=require('../config/db')
 const {User} = require('../model/user')
 const {helper}= require('../utils/helper')
+const {userAuth}=require('../middlewares/userAuth')
 const app=express();
 const PORT=3000;
 
@@ -82,15 +83,20 @@ app.post('/signup',async (req,res)=>{
         }
 
         // Compare password with stored hash & req passwprd
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).send('Wrong password');
-        }
+        // const isMatch = await bcrypt.compare(password, user.password);
+        // if (!isMatch) {
+        //     return res.status(400).send('Wrong password');
+        // }
+        //offload this password comparison functionality also to user db methods
+        const isPasswordValid=await user.validatePassword(password)
+
 
         // If password matches crate a JWT token
         // first parameter - userId , second Secret key
-        var token = jwt.sign({ _id:user._id }, 'shhhhh');
-        //pass jwt token to cookie & send the cookie
+       // var token = jwt.sign({ _id:user._id }, 'shhhhh');
+       // we passed the above functionality to DB level methods , as it has to done for each useer
+         const token=await user.getJWT(); 
+       //pass jwt token to cookie & send the cookie
 
         res.cookie('token', token, {
           httpOnly: true,
@@ -105,31 +111,38 @@ app.post('/signup',async (req,res)=>{
 });
 
 //GET request  to PROFILE
-app.get('/profile', async (req,res)=>{
- const cookie=req.cookies;
- //grab the token from cookie
- const {token}=cookie;
- //check if token exist or not
- if(!token)
- {
-  res.send("Token not exist , re-login")
- }
- // verify or decrypt the token 
-var decoded = jwt.verify(token, 'shhhhh');
-//find the userId in DB using token
-const user = await User.findById(decoded._id);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+app.get('/profile', userAuth,async (req,res)=>{
+//  const cookie=req.cookies;
+//  //grab the token from cookie
+//  const {token}=cookie;
+//  //check if token exist or not
+//  if(!token)
+//  {
+//   res.send("Token not exist , re-login")
+//  }
+//  // verify or decrypt the token 
+// var decoded = jwt.verify(token, 'shhhhh');
+// //find the userId in DB using token
+// const user = await User.findById(decoded._id);
+//         if (!user) {
+//             return res.status(404).json({ message: "User not found" });
+//         }
 
-        res.json({
-            message: "Profile accessed successfully",
-            user: {
-                id: user._id,
-                email: user.emailId,
-            }
-        });
-
+//         res.json({
+//             message: "Profile accessed successfully",
+//             user: {
+//                 id: user._id,
+//                 email: user.emailId,
+//             }
+//         });
+// ported all above code to userAuth middleeware as for every request we have check it
+try{
+    const user=req.user;
+    res.send(user)
+}catch(err)
+{
+  res.status(400).send('Error: '+ err.message)
+}
     
 
 
@@ -138,7 +151,12 @@ console.log(cookie)*/
 
 })
 
-
+//POST Connection Request also need to be loggined
+app.post('/sendConnectionRequest',userAuth,async (req,res)=>{
+  //read the user
+  const user=req.user;
+  res.send(user.firstName + " Connection request sent!!!")
+});
 
 //get user by email
 app.get('/user', async (req,res)=>{
