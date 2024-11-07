@@ -2,8 +2,10 @@ const express= require('express')
 const app=express();
 const authRouter=express.Router();
 const {helper}= require('../utils/helper')
-const {User} = require('../model/user')
+const User = require('../model/user')
 const bcrypt = require('bcrypt');
+
+app.use(express.json());
 //app.use() and router.use() works same
 ///signup
 authRouter.post('/signup',async (req,res)=>{
@@ -79,4 +81,13 @@ authRouter.post('/login', async (req, res) => {
         res.status(400).send(error.message);
     }
 });
+
+//logout api
+// as soon as you hit logoout api , make token value to zero and expire at that instant
+authRouter.post('/logout', async(req,res)=>{
+  res.cookie("token",null,{
+    expires:new Date(Date.now()),
+  })
+  res.send();
+})
 module.exports=authRouter

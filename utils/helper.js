@@ -10,8 +10,13 @@ const  helper=(req)=>{
         throw new Error('Complete all details')
     }
 }
-
-const authenticator=(req)=>{
-    
+//validateProfileData
+const validateProfileData=(req)=>{
+    const allowedEditFields=['firstName','lastName','emailID','photoURL','gender','about','skills','age'];
+    const isEditAllowed=Object.keys(req.body).every((field)=>
+        allowedEditFields.includes(field)
+    )
+    return isEditAllowed;
 }
-module.exports={helper}
+
+module.exports={helper , validateProfileData}
