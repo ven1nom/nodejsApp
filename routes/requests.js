@@ -23,6 +23,12 @@ requestRouter.post('/request/send/:status/:toUserId',userAuth,async (req,res)=>{
      if(!allowedStatus.includes(status)){
       return res.status(400).json({message:'Invalid status value'+ status})
      }
+ 
+     // ValidationCheck - fromUserId and toUserId shouldnt be same
+     //schema - pre hook
+     // kind of middleware 
+     // inside request schema
+
 
     //check if toUser exist or not
     const toUser=await User.findById(toUserId)
@@ -54,7 +60,7 @@ requestRouter.post('/request/send/:status/:toUserId',userAuth,async (req,res)=>{
 
      const data= await connectionRequest.save();
      res.json({
-      message:"Connection req sent successfully",
+      message: req.user.firstName + "is "+ status + "in" + toUser.firstName,
       data,
      })
 
@@ -64,3 +70,10 @@ requestRouter.post('/request/send/:status/:toUserId',userAuth,async (req,res)=>{
     }
   });
 module.exports=requestRouter;
+
+//Note
+// why "indexing" is imp , alot of users boards in , query becomes expensive
+// in 1 million records , multiple people with same name , doing a search query by firstName 
+// my DB will take alot of time time
+// do unique= true or index=true for indexing
+// compound indexing in mongodb
