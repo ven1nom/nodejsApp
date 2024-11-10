@@ -20,13 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 //import all router
 const authRouter=require('../routes/auth');
 const profileRouter=require('../routes/profile');
-const requestRouter=require('../routes/requests')
+const requestRouter=require('../routes/requests');
+const { userRouter } = require('../routes/user');
 
 //using these routes
 app.use('/',authRouter);
 app.use('/',profileRouter);
 app.use('/',requestRouter);
-
+app.use("/",userRouter);
 
 //create a user
 //first validate the req

@@ -1,4 +1,4 @@
-const express=require('express')
+const express=require('express');
 
 const profileRouter=express.Router();
 const {userAuth}=require('../middlewares/userAuth') 
