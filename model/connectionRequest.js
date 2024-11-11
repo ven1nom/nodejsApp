@@ -4,10 +4,12 @@ const connectionRequestSchema=new mongoose.Schema({
      //2 cheeze rahegi
      fromUserId:{
         type:mongoose.Schema.Types.ObjectId,
+        ref:"User", //refrence to the user collection
         required:true, 
     },
      toUserId:{
         type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
         required:true, 
      },
      status:{
